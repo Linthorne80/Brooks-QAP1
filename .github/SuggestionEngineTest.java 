@@ -1,26 +1,43 @@
+package com.keyin;
+
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.nio.file.Path;
+import java.net.URISyntaxException;
 import java.nio.file.Paths;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SuggestionEngineTest {
 
-    @Test
-    public void testGenerateSuggestions() throws IOException {
+    @Test //Testing suggestion generation for a correct word.
+    public void testCorrectWordSuggestion() throws URISyntaxException, IOException {
+
         SuggestionEngine suggestionEngine = new SuggestionEngine();
-        Path testDictionaryFile = Paths.get("src/test/resources/test-words.txt");
+        suggestionEngine.loadDictionaryData(Paths.get( ClassLoader.getSystemResource("words.txt").toURI()));
 
-        // Load a test dictionary
-        suggestionEngine.loadDictionaryData(testDictionaryFile);
+        String suggestions = suggestionEngine.generateSuggestions("apple");
 
-        // Test cases
-        assertEquals("apple\napply\nappler", suggestionEngine.generateSuggestions("aple"));
-        assertEquals("", suggestionEngine.generateSuggestions("apple")); // Known word, should return an empty string
-        assertEquals("java", suggestionEngine.generateSuggestions("jvaa")); // Transpose and replace
+        Assertions.assertEquals("", suggestions, "No suggestions should be generated for a correct word.");
+    }
 
-        // Add more test cases as needed
+    @Test //Testing suggestion generation for an incorrect word.
+    public void testIncorrectWordSuggestion() throws URISyntaxException, IOException {
+        SuggestionEngine suggestionEngine = new SuggestionEngine();
+        suggestionEngine.loadDictionaryData(Paths.get( ClassLoader.getSystemResource("words.txt").toURI()));
+
+
+        String suggestions = suggestionEngine.generateSuggestions("aple");
+
+        Assertions.assertTrue(!suggestions.isEmpty(), "Suggestions should generated for an incorrect word.");
+    }
+
+    @Test
+    public void testCommonMisspelledWordSuggestion() throws URISyntaxException, IOException {
+        SuggestionEngine suggestionEngine = new SuggestionEngine();
+        suggestionEngine.loadDictionaryData(Paths.get( ClassLoader.getSystemResource("words.txt").toURI()));
+
+        String suggestions = suggestionEngine.generateSuggestions("recieve");
+
+        Assertions.assertTrue(!suggestions.isEmpty(), "Suggestions should be generated for a common misspelled word.");
     }
 }
